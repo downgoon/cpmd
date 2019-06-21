@@ -8,10 +8,14 @@
     "fs-extra": "^8.0.1",
     "markdown-parser": "0.0.8"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/downgoon/cpmd.git"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "downgoon@qq.com",
   "license": "MIT"
 }
