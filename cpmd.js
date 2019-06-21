@@ -16,7 +16,8 @@ const optionDefinitions = [
 const options = commandLineArgs(optionDefinitions);
 
 if (options.src == null || options.dst ==null) {
-    console.log("Usage: mdcp --src $src.md --dst $dstdir");
+    console.log("copy markdown file to the destination directory **with its attached images** on local file paths");
+    console.log("Usage: cpmd --src $src.md --dst $dstdir");
     process.exit(1);
 }
 

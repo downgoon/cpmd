@@ -1,6 +1,6 @@
 {
   "name": "cpmd",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "copy markdown file to the destination directory with its attached images on local file paths",
   "main": "cpmd.js",
   "dependencies": {
