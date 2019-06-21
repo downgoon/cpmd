@@ -5,12 +5,16 @@
   "main": "cpmd.js",
   "dependencies": {
     "command-line-args": "^5.1.1",
+    "commander": "^2.20.0",
     "fs-extra": "^8.0.1",
     "markdown-parser": "0.0.8"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/downgoon/cpmd.git"
+  },
+  "bin": {
+    "cpmd": "cpmd.js"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 var fs = require('fs');
 var fse = require("fs-extra");
 var Parser = require('markdown-parser');
