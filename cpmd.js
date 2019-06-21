@@ -35,12 +35,13 @@ if (! fs.lstatSync(dstDirName).isDirectory()) {
     process.exit(3);
 }
 
+// process.cwd() vs. __basename
 if (! path.isAbsolute(srcFileName)) {
-    srcFileName = path.join(__dirname, srcFileName);
+    srcFileName = path.join(process.cwd(), srcFileName);
 }
 
 if (! path.isAbsolute(dstDirName)) {
-    dstDirName = path.join(__dirname, dstDirName);
+    dstDirName = path.join(process.cwd(), dstDirName);
 }
 
 
@@ -55,7 +56,7 @@ parser.parse(content, function(err, md) {
     for (idx in md.references) {
         if (md.references[idx].image == true) {
             fse.copy(path.join(srcDirName, md.references[idx].href),
-                path.join(dstDirName, md.references[idx].href), 
+                path.join(dstDirName, md.references[idx].href),
                 function(err) {
                     if (err != undefined) {
                         console.log(err);
@@ -63,12 +64,13 @@ parser.parse(content, function(err, md) {
             })
             console.log('cp ' + md.references[idx].href + ' to ' + dstDirName );
         }
-        
+
     } // end for
 
-    fse.copy(srcFileName, dstDirName);
+    var dstFileName = path.join(dstDirName, srcFileName.substr(srcDirName.length));
+    fse.copy(srcFileName, dstFileName);
     console.log('cp ' + options.src + ' to ' + dstDirName );
-    
+
 });
 
 

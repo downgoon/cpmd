@@ -13,6 +13,12 @@
     "type": "git",
     "url": "git://github.com/downgoon/cpmd.git"
   },
+  "keyword": [
+    "cpmd",
+    "markdown",
+    "Typora",
+    "move markdown"
+  ],
   "bin": {
     "cpmd": "cpmd.js"
   },
