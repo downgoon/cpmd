@@ -1,0 +1,17 @@
+{
+  "name": "cpmd",
+  "version": "0.1.0",
+  "description": "copy markdown file to the destination directory with its attached images on local file paths",
+  "main": "cpmd.js",
+  "dependencies": {
+    "command-line-args": "^5.1.1",
+    "fs-extra": "^8.0.1",
+    "markdown-parser": "0.0.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
