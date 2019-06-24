@@ -20,6 +20,8 @@ $ cpmd --src README.md --dst backup/
 $ npm install cpmd -g
 ```
 
+https://www.npmjs.com/package/cpmd
+
 - Example:
 
 ``` bash
