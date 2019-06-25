@@ -13,9 +13,10 @@ options.version('0.2.0')
   .parse(process.argv);
  
 if (options.src == undefined || options.dst == undefined) {
-    console.log("copy/move markdown files supporting wildcard characters to the destination directory **with its/their attached images** on local file paths");
+    console.log("copy or move markdown files (supporting wildcard characters) to the destination directory with their attached images usually located on sub dir named 'assets' or 'images'.");
     console.log("Usage(Long Term): cpmd --src <$src.md> --dst <$dstdir> [--move]");
     console.log("Usage(Short Term): cpmd -s <$src.md> -d <$dstdir> [-m]");
+    console.log("Multi Copy Example: cpmd -s 'RE*.md' -d backup/ ");
     process.exit(1);
 }
 
@@ -38,6 +39,7 @@ glob(srcFileWildcard, function (error, srcFileNames) {
 })
 
 function copyOneFile(srcFileName, dstDirName, rmFlag) {
+    let srcFileNameOrigin = srcFileName;
 
     if (! fs.lstatSync(srcFileName).isFile() || ! srcFileName.endsWith('.md')) {
         console.log("--src MUST be a markdown file");
@@ -98,10 +100,10 @@ function copyOneFile(srcFileName, dstDirName, rmFlag) {
         var dstFileName = path.join(dstDirName, srcFileName.substr(srcDirName.length));
         if (rmFlag) {
             fse.move(srcFileName, dstFileName);
-            console.log('mv ' + options.src + ' to ' + dstDirName );
+            console.log('mv ' + srcFileNameOrigin + ' to ' + dstDirName );
         } else {
             fse.copy(srcFileName, dstFileName);
-            console.log('cp ' + options.src + ' to ' + dstDirName );
+            console.log('cp ' + srcFileNameOrigin + ' to ' + dstDirName );
         }
     
     });

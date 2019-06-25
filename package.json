@@ -1,7 +1,7 @@
 {
   "name": "cpmd",
-  "version": "0.2.0-SNAPSHOT",
-  "description": "copy markdown file to the destination directory with its attached images on local file paths",
+  "version": "0.2.0",
+  "description": "copy or move markdown files (supporting wildcard characters) to the destination directory with their attached images on local file paths",
   "main": "cpmd.js",
   "dependencies": {
     "commander": "^2.20.0",
