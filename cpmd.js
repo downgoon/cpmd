@@ -3,77 +3,110 @@ var fs = require('fs');
 var fse = require("fs-extra");
 var Parser = require('markdown-parser');
 const path = require("path");
-const commandLineArgs = require('command-line-args')
+const glob = require("glob");
+const options = require('commander');
 
-
-
-const optionDefinitions = [
-    { name: 'src', alias: 's', type: String},
-    { name: 'dst', alias: 'd', type: String }
-  ];
-
-
-const options = commandLineArgs(optionDefinitions);
-
-if (options.src == null || options.dst ==null) {
-    console.log("copy markdown file to the destination directory **with its attached images** on local file paths");
-    console.log("Usage: cpmd --src $src.md --dst $dstdir");
+options.version('0.2.0')
+  .option('-s, --src <src>', 'src markdown files (supporting wildcard characters)')
+  .option('-d, --dst <dst>', 'dst directory')
+  .option('-m, --move', 'move flag, default value is false', function(v, p) {}, false)
+  .parse(process.argv);
+ 
+if (options.src == undefined || options.dst == undefined) {
+    console.log("copy/move markdown files supporting wildcard characters to the destination directory **with its/their attached images** on local file paths");
+    console.log("Usage(Long Term): cpmd --src <$src.md> --dst <$dstdir> [--move]");
+    console.log("Usage(Short Term): cpmd -s <$src.md> -d <$dstdir> [-m]");
     process.exit(1);
 }
 
-
-var srcFileName = options.src;
+var srcFileWildcard = options.src;
 var dstDirName = options.dst;
+var rmFlag = false;
 
-
-if (! fs.lstatSync(srcFileName).isFile() || ! srcFileName.endsWith('.md')) {
-    console.log("--src MUST be a markdown file");
-    process.exit(2);
+if (options.move != undefined) {
+    rmFlag = true;
 }
 
-if (! fs.lstatSync(dstDirName).isDirectory()) {
-    console.log("--dst MUST be a directory");
-    process.exit(3);
-}
+console.log('src file wildcard: ' + srcFileWildcard);
 
-// process.cwd() vs. __basename
-if (! path.isAbsolute(srcFileName)) {
-    srcFileName = path.join(process.cwd(), srcFileName);
-}
-
-if (! path.isAbsolute(dstDirName)) {
-    dstDirName = path.join(process.cwd(), dstDirName);
-}
-
-
-var srcDirName = path.dirname(srcFileName);
-
-var content = fs.readFileSync(srcFileName, 'utf8');
-
-var parser = new Parser();
-parser.parse(content, function(err, md) {
-
+glob(srcFileWildcard, function (error, srcFileNames) {
+    console.log('src file list: ' + srcFileNames);
     let idx = 0;
-    for (idx in md.references) {
-        if (md.references[idx].image == true) {
-            fse.copy(path.join(srcDirName, md.references[idx].href),
-                path.join(dstDirName, md.references[idx].href),
-                function(err) {
-                    if (err != undefined) {
-                        console.log(err);
-                    }
-            })
-            console.log('cp ' + md.references[idx].href + ' to ' + dstDirName );
+    for (idx in srcFileNames) {
+        copyOneFile(srcFileNames[idx], dstDirName, rmFlag);
+    }
+})
+
+function copyOneFile(srcFileName, dstDirName, rmFlag) {
+
+    if (! fs.lstatSync(srcFileName).isFile() || ! srcFileName.endsWith('.md')) {
+        console.log("--src MUST be a markdown file");
+        process.exit(2);
+    }
+    
+    if (! fs.lstatSync(dstDirName).isDirectory()) {
+        console.log("--dst MUST be a directory");
+        process.exit(3);
+    }
+    
+    // process.cwd() vs. __basename
+    if (! path.isAbsolute(srcFileName)) {
+        srcFileName = path.join(process.cwd(), srcFileName);
+    }
+    
+    if (! path.isAbsolute(dstDirName)) {
+        dstDirName = path.join(process.cwd(), dstDirName);
+    }
+    
+    
+    var srcDirName = path.dirname(srcFileName);
+    
+    var content = fs.readFileSync(srcFileName, 'utf8');
+    
+    var parser = new Parser();
+    parser.parse(content, function(err, md) {
+    
+        let idx = 0;
+        for (idx in md.references) {
+            if (md.references[idx].image == true) {
+                let srcFinal = path.join(srcDirName, md.references[idx].href);
+                let dstFinal = path.join(dstDirName, md.references[idx].href);
+                
+                if (rmFlag) {
+                    fse.move(srcFinal, dstFinal,
+                        function(err) {
+                            if (err != undefined) {
+                                console.log(err);
+                        }
+                    });
+                    console.log('mv ' + md.references[idx].href + ' to ' + dstDirName );
+
+                } else {
+                    fse.copy(srcFinal, dstFinal,
+                        function(err) {
+                            if (err != undefined) {
+                                console.log(err);
+                        }
+                    });
+                    console.log('cp ' + md.references[idx].href + ' to ' + dstDirName );
+                }
+                
+            }
+    
+        } // end for
+    
+        var dstFileName = path.join(dstDirName, srcFileName.substr(srcDirName.length));
+        if (rmFlag) {
+            fse.move(srcFileName, dstFileName);
+            console.log('mv ' + options.src + ' to ' + dstDirName );
+        } else {
+            fse.copy(srcFileName, dstFileName);
+            console.log('cp ' + options.src + ' to ' + dstDirName );
         }
-
-    } // end for
-
-    var dstFileName = path.join(dstDirName, srcFileName.substr(srcDirName.length));
-    fse.copy(srcFileName, dstFileName);
-    console.log('cp ' + options.src + ' to ' + dstDirName );
-
-});
-
+    
+    });
+    
+}
 
 process.on('unhandledRejection', error => {
     // do nothing
