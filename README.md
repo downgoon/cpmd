@@ -1,3 +1,5 @@
+[![HitCount](http://hits.dwyl.io/downgoon/cpmd.svg)](http://hits.dwyl.io/downgoon/cpmd)
+
 # cpmd
 
 
