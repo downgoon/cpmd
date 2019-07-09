@@ -6,10 +6,11 @@ const path = require("path");
 const glob = require("glob");
 const options = require('commander');
 
-options.version('0.2.0')
+options.version('0.3.0')
   .option('-s, --src <src>', 'src markdown files (supporting wildcard characters)')
   .option('-d, --dst <dst>', 'dst directory')
   .option('-m, --move', 'move flag, default value is false', function(v, p) {}, false)
+  .option('-x, --hexo', 'hexo-style flag, default value is false', function(v, p) {}, false)
   .parse(process.argv);
  
 if (options.src == undefined || options.dst == undefined) {
@@ -23,25 +24,34 @@ if (options.src == undefined || options.dst == undefined) {
 var srcFileWildcard = options.src;
 var dstDirName = options.dst;
 var rmFlag = false;
+var hexoFlag = false;
 
 if (options.move != undefined) {
     rmFlag = true;
 }
 
+if (options.hexo != undefined) {
+    hexoFlag = true;
+}
+
 console.log('src file wildcard: ' + srcFileWildcard);
 
+// wildcard supporting for multi markdown coping
 glob(srcFileWildcard, function (error, srcFileNames) {
+    // matched markdown files against wildcard pattern
     console.log('src file list: ' + srcFileNames);
     let idx = 0;
     for (idx in srcFileNames) {
+        // multi-copy one by one
         copyOneFile(srcFileNames[idx], dstDirName, rmFlag);
     }
 })
 
-function copyOneFile(srcFileName, dstDirName, rmFlag) {
-    let srcFileNameOrigin = srcFileName;
+function copyOneFile(mdSrcFileName, dstDirName, rmFlag) {
+    // mdSrcFileNameOrigin: markdown relative file path, e.g. 'hello.md'
+    let mdSrcFileNameOrigin = mdSrcFileName;
 
-    if (! fs.lstatSync(srcFileName).isFile() || ! srcFileName.endsWith('.md')) {
+    if (! fs.lstatSync(mdSrcFileName).isFile() || ! mdSrcFileName.endsWith('.md')) {
         console.log("--src MUST be a markdown file");
         process.exit(2);
     }
@@ -51,19 +61,25 @@ function copyOneFile(srcFileName, dstDirName, rmFlag) {
         process.exit(3);
     }
     
+    // mdSrcFileName: markdown absolute file path, e.g. '/Users/downgoon/Document/hello.md'
     // process.cwd() vs. __basename
-    if (! path.isAbsolute(srcFileName)) {
-        srcFileName = path.join(process.cwd(), srcFileName);
+    if (! path.isAbsolute(mdSrcFileName)) {
+        mdSrcFileName = path.join(process.cwd(), mdSrcFileName);
     }
     
+    // dstDirName: absolute dest path, e.g. '/Users/downgoon/Backup/'
     if (! path.isAbsolute(dstDirName)) {
         dstDirName = path.join(process.cwd(), dstDirName);
     }
     
+    // srcDirName: markdown absolute dir path, e.g. '/Users/downgoon/Document/'
+    var srcDirName = path.dirname(mdSrcFileName);
+
+    // mdSrcNoExt: markdown file name without extension, e.g. 'hello'
+    var mdSrcNoExt = path.parse(mdSrcFileName).name;
     
-    var srcDirName = path.dirname(srcFileName);
     
-    var content = fs.readFileSync(srcFileName, 'utf8');
+    var content = fs.readFileSync(mdSrcFileName, 'utf8');
     
     var parser = new Parser();
     parser.parse(content, function(err, md) {
@@ -71,39 +87,52 @@ function copyOneFile(srcFileName, dstDirName, rmFlag) {
         let idx = 0;
         for (idx in md.references) {
             if (md.references[idx].image == true) {
-                let srcFinal = path.join(srcDirName, md.references[idx].href);
-                let dstFinal = path.join(dstDirName, md.references[idx].href);
+                // md.references[idx].href: image referencing path, e.g. 'assets/world.png'  or 'http://s3.amazon.com/world.png'
+                if (md.references[idx].href.startsWith('http[s]?://')) {
+                    continue; // skip remote http image
+                }
+
+                // imgSrcFinal: image absolute src path, e.g. '/Users/downgoon/Document/assets/world.png'
+                // imgDstFinal: image absolute dst path, e.g. '/Users/downgoon/Backup/assets/world.png'
+                let imgSrcFinal = path.join(srcDirName, md.references[idx].href);
+                let imgDstFinal = path.join(dstDirName, md.references[idx].href);
+                if (hexoFlag) {
+                    // e.g. extract 'world.png'
+                    var imgBaseName = path.parse(md.references[idx].href).base;
+                    // e.g. '/Users/downgoon/Backup/hello/world.png'
+                    imgDstFinal = path.join(dstDirName, mdSrcNoExt, imgBaseName);
+                }
                 
                 if (rmFlag) {
-                    fse.move(srcFinal, dstFinal,
+                    fse.move(imgSrcFinal, imgDstFinal,
                         function(err) {
                             if (err != undefined) {
                                 console.log(err);
                         }
                     });
-                    console.log('mv ' + md.references[idx].href + ' to ' + dstDirName );
+                    console.log('mv ' + md.references[idx].href + ' to ' + imgDstFinal );
 
                 } else {
-                    fse.copy(srcFinal, dstFinal,
+                    fse.copy(imgSrcFinal, imgDstFinal,
                         function(err) {
                             if (err != undefined) {
                                 console.log(err);
                         }
                     });
-                    console.log('cp ' + md.references[idx].href + ' to ' + dstDirName );
+                    console.log('cp ' + md.references[idx].href + ' to ' + imgDstFinal );
                 }
                 
             }
     
         } // end for
     
-        var dstFileName = path.join(dstDirName, srcFileName.substr(srcDirName.length));
+        var dstFileName = path.join(dstDirName, mdSrcFileName.substr(srcDirName.length));
         if (rmFlag) {
-            fse.move(srcFileName, dstFileName);
-            console.log('mv ' + srcFileNameOrigin + ' to ' + dstDirName );
+            fse.move(mdSrcFileName, dstFileName);
+            console.log('mv ' + mdSrcFileNameOrigin + ' to ' + dstDirName );
         } else {
-            fse.copy(srcFileName, dstFileName);
-            console.log('cp ' + srcFileNameOrigin + ' to ' + dstDirName );
+            fse.copy(mdSrcFileName, dstFileName);
+            console.log('cp ' + mdSrcFileNameOrigin + ' to ' + dstDirName );
         }
     
     });
