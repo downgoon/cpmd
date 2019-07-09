@@ -4,7 +4,7 @@
 
 
 
-copy or move markdown files (supporting wildcard characters) to the destination directory **with their attached images** usually located on sub dir named 'assets' or 'images'. the application has been published into https://www.npmjs.com/package/cpmd. By the way, An awesome editor [Typora](https://typora.io/) is recommended, if you also like writing in markdown.
+copy or move markdown files (supporting wildcard characters) to the destination directory **with their attached images** usually located on sub dir named 'assets', 'images' or '$filename'. the application has been published into https://www.npmjs.com/package/cpmd. By the way, An awesome editor [Typora](https://typora.io/) is recommended, if you also like writing in markdown.
 
 
 
@@ -53,7 +53,7 @@ src file wildcard: RE*.md
 src file list: README.md,REMORE.md
 cp assets/image-20190625115442118.png to /Users/downgoon/Documents/backup/
 cp README.md to /Users/downgoon/Documents/backup/
-cp REMORE.md to /Users/downgoon/Documents/backup/ 
+cp REMORE.md to /Users/downgoon/Documents/backup/
 
 $ tree .   # the two files' layout
 .
@@ -78,7 +78,7 @@ $ cpmd
 copy/move markdown files supporting wildcard characters to the destination directory **with its/their attached images** on local file paths
 Usage(Long Term): cpmd --src <$src.md> --dst <$dstdir> [--move]
 Usage(Short Term): cpmd -s <$src.md> -d <$dstdir> [-m]
-Multi Copy Example: cpmd -s 'RE*.md' -d backup/ 
+Multi Copy Example: cpmd -s 'RE*.md' -d backup/
 
 $ cpmd -h
 Options:
@@ -187,7 +187,7 @@ Usage: mdcp --src $src.md --dst $dstdir
 
 ``` bash
 
-$ npm login   # please signup an account firstly 
+$ npm login   # please signup an account firstly
 Username: downgoon
 Password:  # input your password hear
 Email: (this IS public) downgoon@qq.com
@@ -242,7 +242,7 @@ published 39 seconds ago by downgoon <downgoon@qq.com>
 
 
 
-- **remotely install**: download from 'registry.npmjs.org' and install 
+- **remotely install**: download from 'registry.npmjs.org' and install
 
 ``` bash
 $ npm install cpmd -g
@@ -251,4 +251,3 @@ $ npm install cpmd -g
 updated 12 packages in 3.2s
 
 ```
-
