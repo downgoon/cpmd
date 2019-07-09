@@ -78,17 +78,19 @@ function copyOneFile(mdSrcFileName, dstDirName, rmFlag) {
     // mdSrcNoExt: markdown file name without extension, e.g. 'hello'
     var mdSrcNoExt = path.parse(mdSrcFileName).name;
     
-    
-    var content = fs.readFileSync(mdSrcFileName, 'utf8');
-    
+    // img references to be changed
+    // e.g { 'assets/world.png': 'hello/world.png', 'asset/abcd.png': 'hello/abcd.png' }
+    var imgRefChanged = {};
+
+    var mdSrcFileContent = fs.readFileSync(mdSrcFileName, 'utf8');
     var parser = new Parser();
-    parser.parse(content, function(err, md) {
+    parser.parse(mdSrcFileContent, function(err, md) {
     
         let idx = 0;
         for (idx in md.references) {
             if (md.references[idx].image == true) {
                 // md.references[idx].href: image referencing path, e.g. 'assets/world.png'  or 'http://s3.amazon.com/world.png'
-                if (md.references[idx].href.startsWith('http[s]?://')) {
+                if (md.references[idx].href.startsWith("https?:\/\/")) {
                     continue; // skip remote http image
                 }
 
@@ -101,6 +103,8 @@ function copyOneFile(mdSrcFileName, dstDirName, rmFlag) {
                     var imgBaseName = path.parse(md.references[idx].href).base;
                     // e.g. '/Users/downgoon/Backup/hello/world.png'
                     imgDstFinal = path.join(dstDirName, mdSrcNoExt, imgBaseName);
+                    // console.log('imgRefChanged: ' + md.references[idx].href + ' : ' + path.join(mdSrcNoExt, imgBaseName));
+                    imgRefChanged[md.references[idx].href] = path.join(mdSrcNoExt, imgBaseName);
                 }
                 
                 if (rmFlag) {
@@ -125,20 +129,42 @@ function copyOneFile(mdSrcFileName, dstDirName, rmFlag) {
             }
     
         } // end for
-    
+
+        
+        let rewriteFlag = hexoFlag && Object.keys(imgRefChanged).length > 0;
         var dstFileName = path.join(dstDirName, mdSrcFileName.substr(srcDirName.length));
-        if (rmFlag) {
-            fse.move(mdSrcFileName, dstFileName);
-            console.log('mv ' + mdSrcFileNameOrigin + ' to ' + dstDirName );
-        } else {
-            fse.copy(mdSrcFileName, dstFileName);
-            console.log('cp ' + mdSrcFileNameOrigin + ' to ' + dstDirName );
+
+
+        // copy or move src markdown file
+        if (! rewriteFlag) {
+            if (rmFlag) {
+                fse.move(mdSrcFileName, dstFileName);
+                console.log('mv ' + mdSrcFileNameOrigin + ' to ' + dstDirName );
+            } else {
+                fse.copy(mdSrcFileName, dstFileName);
+                console.log('cp ' + mdSrcFileNameOrigin + ' to ' + dstDirName );
+            }
         }
-    
+        
+        // replace image references and write into another new file
+        if (rewriteFlag) {
+            // key (searchValue) --> value (replaceValue)
+            for (var key in imgRefChanged) {
+                console.log('replace: ' + key + ' => ' + imgRefChanged[key]);
+                mdSrcFileContent = mdSrcFileContent.replace(key, imgRefChanged[key])
+            }
+            fse.writeFileSync(dstFileName, mdSrcFileContent);
+            console.log('rewrite file: ' + dstFileName);
+            if (rmFlag) {
+                fse.removeSync(mdSrcFileName);
+            }
+        }
+
     });
     
 }
 
 process.on('unhandledRejection', error => {
     // do nothing
+    console.log('error: ' + error);
 });

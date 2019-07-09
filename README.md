@@ -99,6 +99,17 @@ Options:
 
 ## Developer Guide
 
+### Quick Start
+
+``` bash
+$ git clone git@github.com:downgoon/cpmd.git
+$ cd cpmd
+$ npm install   # download dependencies and save them into 'node_modules'
+$ node cpmd.js  # debug
+$ mkdir backup  # create a directory at which markdown files will be placed
+$ node cpmd.js -s './test/REMORE.md' -d backup/ --hexo # test hexo-style copy
+```
+
 
 ### local install
 
