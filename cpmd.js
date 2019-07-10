@@ -18,6 +18,7 @@ if (options.src == undefined || options.dst == undefined) {
     console.log("Usage(Long Term): cpmd --src <$src.md> --dst <$dstdir> [--move]");
     console.log("Usage(Short Term): cpmd -s <$src.md> -d <$dstdir> [-m]");
     console.log("Multi Copy Example: cpmd -s 'RE*.md' -d backup/ ");
+    console.log("hexo-style copy: cpmd -s './test/REMORE.md' -d backup/ --hexo");
     process.exit(1);
 }
 
