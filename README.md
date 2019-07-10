@@ -69,6 +69,30 @@ $ tree .   # the two files' layout
 
 
 
+- **hexo-style copy**: in [hexo](https://hexo.io/docs/asset-folders), Asset folder will have the same name as the markdown file associated with the post. Place all assets related to your post into the associated folder, and you will be able to reference them using a relative path, making for an easier and more convenient workflow. For example: 
+
+  - before coping, source layout of the markdown file and its attached images
+
+  ``` bash
+  $ tree .
+  ├── README.md
+  ├── assets
+  │   ├── image-20190708204512742.png
+  ```
+
+  - after copying, destination layout
+
+  ``` bash
+  $ cpmd -s README.md -d hexo-blog/source/_post/ --hexo
+  
+  $ tree hexo-blog/source/_post/ 
+  ├── README
+  │   └── image-20190708204512742.png
+  ├── README.md
+  ```
+
+
+
 - **Help Info**: for help information, please type ``cpmd -h`` or ``cpmd`` directly
 
 
@@ -99,6 +123,16 @@ Options:
 
 ## Developer Guide
 
+### Quick Start
+
+``` bash
+$ git clone git@github.com:downgoon/cpmd.git
+$ cd cpmd
+$ npm install   # download dependencies and save them into 'node_modules'
+$ node cpmd.js  # debug
+$ mkdir backup  # create a directory at which markdown files will be placed
+$ node cpmd.js -s './test/REMORE.md' -d backup/ --hexo # test hexo-style copy
+```
 
 
 ### local install
@@ -158,7 +192,8 @@ const path = require("path");
 - **locally install**
 
 ``` bash
-$ npm install . -g
+$ sudo npm uninstall . -g  # uninstall previous version
+$ sudo npm install . -g  # install local new version
 /usr/local/bin/cpmd -> /usr/local/lib/node_modules/cpmd/cpmd.js
 + cpmd@0.1.0
 updated 1 package in 0.161s
