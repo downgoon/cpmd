@@ -192,7 +192,8 @@ const path = require("path");
 - **locally install**
 
 ``` bash
-$ npm install . -g
+$ sudo npm uninstall . -g  # uninstall previous version
+$ sudo npm install . -g  # install local new version
 /usr/local/bin/cpmd -> /usr/local/lib/node_modules/cpmd/cpmd.js
 + cpmd@0.1.0
 updated 1 package in 0.161s
